@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: tes-bff-service
+logging:
+  level:
+    com.skcc.tes: info
+    org.springframework.cloud: debug
+api:
+  sample:
+    url: http://localhost:8082
+
