@@ -7,5 +7,5 @@ logging:
     org.springframework.cloud: debug
 api:
   sample:
-    url: http://localhost:8082
+    url: http://clouddance.hrd-edu.cloudzcp.com/sample
 
