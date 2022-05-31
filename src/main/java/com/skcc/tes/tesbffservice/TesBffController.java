@@ -36,28 +36,41 @@ public class TesBffController {
         return "It's Working in tes_bff Service";
     }
 
-    @GetMapping("/circuitbef")
-    public Tes tes_circuitbef() {
+    @GetMapping("/circuit")
+    public Tes tes_circuit() {
 
-        log.info("==================circuit start===================================");
+        log.info("==================circuit  start===================================");
         CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitbreaker");
         Tes tes = circuitBreaker.run(() -> restTemplate.getForObject(String.format("%s%s",apiGatewayUrl,"/tesgood"), Tes.class)
                 ,throwable -> new Tes());
-        //Tes tes = restTemplate.getForObject(String.format("%s%s",apiGatewayUrl,"/tesgood"), Tes.class);
 
         log.info("getBody: {}", tes.getName());
-        log.info("==================circuit end===================================");
+        log.info("==================circuit  end===================================");
         return tes ;
     }
 
-    @GetMapping("/circuitaft")
-    public Tes tes_circuitaft() {
 
-        log.info("==================circuit start===================================");
+    @GetMapping("/circuit/timeout")
+    public Tes tes_circuitTimeout() {
+
+        log.info("==================circuit timeout start===================================");
+        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitbreaker");
+        Tes tes = circuitBreaker.run(() -> restTemplate.getForObject(String.format("%s%s",apiGatewayUrl,"/tesbad"), Tes.class)
+                ,throwable -> new Tes());
+
+        log.info("getBody: {}", tes.getName());
+        log.info("==================circuit timeout end===================================");
+        return tes ;
+    }
+
+    @GetMapping("/circuit/no")
+    public Tes tes_circuitNo() {
+
+        log.info("==================circuit no start===================================");
         Tes tes = restTemplate.getForObject(String.format("%s%s",apiGatewayUrl,"/tesbad"), Tes.class);
 
         log.info("getBody: {}", tes.getName());
-        log.info("==================circuit end===================================");
+        log.info("==================circuit no end===================================");
         return tes ;
     }
 }
