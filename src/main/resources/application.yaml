@@ -7,5 +7,5 @@ logging:
     org.springframework.cloud: debug
 api:
   sample:
-    url: http://clouddance.hrd-edu.cloudzcp.com/sample
+    url: http://tes-sample-app-dev:8080
 
