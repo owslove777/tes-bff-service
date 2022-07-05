@@ -9,3 +9,11 @@ api:
   sample:
     url: http://tes-sample-app-dev:8080
 
+tes:
+  url:
+    user: http://user-service-app-dev:8080
+    contract: http://contract-service-app-dev:8080
+    payment: http://payment-service-app-dev:8080
+    settlement: http://settlement-app-dev:8080
+    starrating: http://star-rating-app-dev:8080
+    talent: http://talent-app-dev:8080
