@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
-@RestController("/data")
+@RestController
 @CrossOrigin(methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE, RequestMethod.PUT, RequestMethod.OPTIONS})
 @RequiredArgsConstructor
 @Slf4j
