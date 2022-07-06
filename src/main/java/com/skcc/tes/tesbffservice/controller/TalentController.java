@@ -83,7 +83,7 @@ public class TalentController {
             dto.setCategoryName(categoryMap.get(categoryId).getCategoryName());
 
             if (!nameMap.containsKey(userId)) {
-                UserDto user =  restTemplate.getForObject(String.format("%s%s", userServiceUrl, "/user/" + userId), UserDto.class);
+                UserDto user =  restTemplate.getForObject(String.format("%s%s", userServiceUrl, "/users/" + userId), UserDto.class);
                 nameMap.put(userId, user.getName());
             }
             dto.setUserName(nameMap.get(userId));
