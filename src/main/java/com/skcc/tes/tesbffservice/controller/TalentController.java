@@ -90,7 +90,7 @@ public class TalentController {
         }
 
 
-        return list;
+        return talentList;
     }
 
     private <T> List<T> convertList(List list, Class<T> clazz){
