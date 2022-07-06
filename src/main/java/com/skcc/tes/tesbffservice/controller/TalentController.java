@@ -1,6 +1,7 @@
 package com.skcc.tes.tesbffservice.controller;
 
 import com.skcc.tes.tesbffservice.vo.TalentCategoryDto;
+import com.skcc.tes.tesbffservice.vo.TalentDetailDto;
 import com.skcc.tes.tesbffservice.vo.TalentDto;
 import com.skcc.tes.tesbffservice.vo.UserDto;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,9 @@ public class TalentController {
 
     @Value("${tes.url.talent}")
     private String talentServiceUrl;
+
+    @Value("${tes.url.user}")
+    private String userServiceUrl;
 
     @GetMapping("/talent/category")
     public List<TalentCategoryDto> getAllCategory() {
@@ -62,8 +66,29 @@ public class TalentController {
     }
 
     @GetMapping("/talents/user/{id}")
-    public List<TalentDto> findByUserId(@PathVariable Long id){
-        List<TalentDto> list = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/user/"+id), List.class);
+    public List<TalentDetailDto> findByUserId(@PathVariable Long id){
+        // 재능인 ID, Category Name
+        List<TalentDetailDto> list = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/user/"+id), List.class);
+
+        Map<Long, TalentCategoryDto> categoryMap = new HashMap<>();
+        Map<Long, String> nameMap = new HashMap<>();
+        for(TalentDetailDto dto: list) {
+            long categoryId =  dto.getCategoryId();
+            long userId = dto.getUserId();
+            if (!categoryMap.containsKey(categoryId)) {
+                TalentCategoryDto category = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/category/" + categoryId), TalentCategoryDto.class);
+                categoryMap.put(categoryId, category);
+            }
+            dto.setCategoryName(categoryMap.get(categoryId).getCategoryName());
+
+            if (!nameMap.containsKey(userId)) {
+                UserDto user =  restTemplate.getForObject(String.format("%s%s", userServiceUrl, "/user/" + userId), UserDto.class);
+                nameMap.put(userId, user.getName());
+            }
+            dto.setUserName(nameMap.get(userId));
+        }
+
+
         return list;
     }
 }
