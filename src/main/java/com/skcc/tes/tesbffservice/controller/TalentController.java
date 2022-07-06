@@ -66,26 +66,26 @@ public class TalentController {
     }
 
     @GetMapping("/talents/user/{id}")
-    public List<TalentDetailDto> findByUserId(@PathVariable Long id){
+    public List<Map<String, Object>> findByUserId(@PathVariable Long id){
         // 재능인 ID, Category Name
-        List<TalentDetailDto> list = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/user/"+id), List.class);
+        List<Map<String, Object>> list = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/user/"+id), List.class);
 
         Map<Long, Map<String, Object>> categoryMap = new HashMap<>();
         Map<Long, String> nameMap = new HashMap<>();
-        for(TalentDetailDto dto: list) {
-            long categoryId =  dto.getCategoryId();
-            long userId = dto.getUserId();
+        for(Map dto: list) {
+            long categoryId =  (long)dto.get("categoryId");
+            long userId = (long)dto.get("userId");
             if (!categoryMap.containsKey(categoryId)) {
                 Map<String, Object> category = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/category/" + categoryId), Map.class);
                 categoryMap.put(categoryId, category);
             }
-            dto.setCategoryName(categoryMap.get(categoryId).get("categoryName").toString());
+            dto.put("categoryName", categoryMap.get(categoryId).get("categoryName").toString());
 
             if (!nameMap.containsKey(userId)) {
                 Map<String, Object> user =  restTemplate.getForObject(String.format("%s%s", userServiceUrl, "/user/" + userId), Map.class);
                 nameMap.put(userId, user.get("name").toString());
             }
-            dto.setUserName(nameMap.get(userId));
+            dto.put("userName", nameMap.get(userId));
         }
 
         return list;
