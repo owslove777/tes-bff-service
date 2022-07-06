@@ -1,20 +1,18 @@
 package com.skcc.tes.tesbffservice.controller;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skcc.tes.tesbffservice.vo.TalentCategoryDto;
 import com.skcc.tes.tesbffservice.vo.TalentDetailDto;
 import com.skcc.tes.tesbffservice.vo.TalentDto;
 import com.skcc.tes.tesbffservice.vo.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @CrossOrigin(methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE, RequestMethod.PUT, RequestMethod.OPTIONS})
@@ -23,6 +21,7 @@ import java.util.Map;
 public class TalentController {
 
     private final RestTemplate restTemplate;
+    private ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @Value("${tes.url.talent}")
     private String talentServiceUrl;
@@ -66,26 +65,31 @@ public class TalentController {
     }
 
     @GetMapping("/talents/user/{id}")
-    public List<Map<String, Object>> findByUserId(@PathVariable Long id){
+    public List<TalentDetailDto> findByUserId(@PathVariable Long id){
         // 재능인 ID, Category Name
-        List<Map<String, Object>> list = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/user/"+id), List.class);
+        List list = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/user/"+id), List.class);
+        List<TalentDetailDto> talentList = new ArrayList<>();
+        list.forEach(s -> {
+            TalentDetailDto dto = objectMapper.convertValue(s, TalentDetailDto.class);
+            talentList.add(dto);
+        });
 
-        Map<Long, Map<String, Object>> categoryMap = new HashMap<>();
+        Map<Long, TalentCategoryDto> categoryMap = new HashMap<>();
         Map<Long, String> nameMap = new HashMap<>();
-        for(Map dto: list) {
-            long categoryId =  (long)dto.get("categoryId");
-            long userId = (long)dto.get("userId");
+        for(TalentDetailDto dto: talentList) {
+            long categoryId =  dto.getCategoryId();
+            long userId = dto.getUserId();
             if (!categoryMap.containsKey(categoryId)) {
-                Map<String, Object> category = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/category/" + categoryId), Map.class);
+                TalentCategoryDto category = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/category/" + categoryId), TalentCategoryDto.class);
                 categoryMap.put(categoryId, category);
             }
-            dto.put("categoryName", categoryMap.get(categoryId).get("categoryName").toString());
+            dto.setCategoryName(categoryMap.get(categoryId).getCategoryName());
 
             if (!nameMap.containsKey(userId)) {
-                Map<String, Object> user =  restTemplate.getForObject(String.format("%s%s", userServiceUrl, "/user/" + userId), Map.class);
-                nameMap.put(userId, user.get("name").toString());
+                UserDto user =  restTemplate.getForObject(String.format("%s%s", userServiceUrl, "/user/" + userId), UserDto.class);
+                nameMap.put(userId, user.getName());
             }
-            dto.put("userName", nameMap.get(userId));
+            dto.setUserName(nameMap.get(userId));
         }
 
         return list;
