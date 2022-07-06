@@ -68,11 +68,7 @@ public class TalentController {
     public List<TalentDetailDto> findByUserId(@PathVariable Long id){
         // 재능인 ID, Category Name
         List list = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/user/"+id), List.class);
-        List<TalentDetailDto> talentList = new ArrayList<>();
-        list.forEach(s -> {
-            TalentDetailDto dto = objectMapper.convertValue(s, TalentDetailDto.class);
-            talentList.add(dto);
-        });
+        List<TalentDetailDto> talentList = convertList(list, TalentDetailDto.class);
 
         Map<Long, TalentCategoryDto> categoryMap = new HashMap<>();
         Map<Long, String> nameMap = new HashMap<>();
@@ -80,7 +76,8 @@ public class TalentController {
             long categoryId =  dto.getCategoryId();
             long userId = dto.getUserId();
             if (!categoryMap.containsKey(categoryId)) {
-                TalentCategoryDto category = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/category/" + categoryId), TalentCategoryDto.class);
+                List categoryList = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/category/" + categoryId), List.class);
+                TalentCategoryDto category = convertList(categoryList, TalentCategoryDto.class).get(0);
                 categoryMap.put(categoryId, category);
             }
             dto.setCategoryName(categoryMap.get(categoryId).getCategoryName());
@@ -92,6 +89,16 @@ public class TalentController {
             dto.setUserName(nameMap.get(userId));
         }
 
+
         return list;
+    }
+
+    private <T> List<T> convertList(List list, Class<T> clazz){
+        List<T> ret = new ArrayList<>();
+        list.forEach(s -> {
+            T dto = objectMapper.convertValue(s, clazz);
+            ret.add(dto);
+        });
+        return ret;
     }
 }
