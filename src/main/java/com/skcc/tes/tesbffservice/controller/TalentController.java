@@ -120,8 +120,7 @@ public class TalentController {
         long categoryId =  dto.getCategoryId();
         long userId = dto.getUserId();
         if (!categoryMap.containsKey(categoryId)) {
-            List categoryList = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/category/" + categoryId), List.class);
-            TalentCategoryDto category = convertList(categoryList, TalentCategoryDto.class).get(0);
+            TalentCategoryDto category = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/category/" + categoryId), TalentCategoryDto.class);
             categoryMap.put(categoryId, category);
         }
         dto.setCategoryName(categoryMap.get(categoryId).getCategoryName());
@@ -137,8 +136,7 @@ public class TalentController {
     private TalentDetailDto addDetailInfoToDto(TalentDetailDto dto) {
         long categoryId =  dto.getCategoryId();
         long userId = dto.getUserId();
-        List categoryList = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/category/" + categoryId), List.class);
-        TalentCategoryDto category = convertList(categoryList, TalentCategoryDto.class).get(0);
+        TalentCategoryDto category = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/category/" + categoryId), TalentCategoryDto.class);
         dto.setCategoryName(category.getCategoryName());
         UserDto user =  restTemplate.getForObject(String.format("%s%s", userServiceUrl, "/users/" + userId), UserDto.class);
         dto.setUserName(user.getName());
