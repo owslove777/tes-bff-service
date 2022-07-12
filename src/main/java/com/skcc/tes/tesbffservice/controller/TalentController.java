@@ -65,6 +65,7 @@ public class TalentController {
         if (address != null && address.length() > 0) {
             reqUrl += "?address="+address;
         }
+        log.info("### Calling " + reqUrl);
         List list = restTemplate.getForObject(reqUrl, List.class);
         return addDetailInfoToList(list);
     }
