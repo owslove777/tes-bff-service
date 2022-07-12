@@ -24,7 +24,7 @@ import java.util.Map;
 public class TalentController {
 
     private final RestTemplate restTemplate;
-    private ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private final ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @Value("${tes.url.talent}")
     private String talentServiceUrl;
@@ -60,11 +60,12 @@ public class TalentController {
     @GetMapping("/talents/category/{id}")
     public List<TalentDetailDto> findByCategoryId(@PathVariable Long id,
                                             @RequestParam(required = false) String address){
-        Map<String, Object> payload = new HashMap<>();
-        if (address != null) {
-            payload.put("address", address);
+        String reqUrl = String.format("%s%s", talentServiceUrl, "/talents/category/"+id);
+//        Map<String, Object> payload = new HashMap<>();
+        if (address != null && address.length() > 0) {
+            reqUrl += "?address="+address;
         }
-        List list = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/talents/category/"+id), List.class, payload);
+        List list = restTemplate.getForObject(reqUrl, List.class);
         return addDetailInfoToList(list);
     }
 
