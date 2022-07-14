@@ -2,13 +2,17 @@ package com.skcc.tes.tesbffservice.controller;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skcc.tes.tesbffservice.Tes;
 import com.skcc.tes.tesbffservice.vo.TalentCategoryDto;
 import com.skcc.tes.tesbffservice.vo.TalentDetailDto;
 import com.skcc.tes.tesbffservice.vo.TalentDto;
 import com.skcc.tes.tesbffservice.vo.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -25,6 +29,7 @@ public class TalentController {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
     @Value("${tes.url.talent}")
     private String talentServiceUrl;
@@ -34,7 +39,10 @@ public class TalentController {
 
     @GetMapping("/talents/category")
     public List<TalentCategoryDto> getAllCategory() {
-        List<TalentCategoryDto> list = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/category"), List.class);
+        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("talentCircuitBreaker");
+        List<TalentCategoryDto> list = circuitBreaker.run(() -> restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/category"), List.class)
+                ,throwable -> new ArrayList());
+//        List<TalentCategoryDto> list = restTemplate.getForObject(String.format("%s%s", talentServiceUrl, "/category"), List.class);
         return list;
     }
 
